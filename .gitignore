@@ -11,3 +11,6 @@ __pycache__/
 # Virtual environment (recreated from requirements.txt, never committed)
 .venv/
 
+
+# Personal learning notes (kept local, never published)
+learning/

@@ -9,7 +9,5 @@ __pycache__/
 .pytest_cache/
 
 # Virtual environment (recreated from requirements.txt, never committed)
-# TODO(you): write the line that tells Git to ignore the virtual envir
 .venv/
 
-# Hint: in task 1.2 we will create it with the name ".venv"; a trailing "/" means "a folder".

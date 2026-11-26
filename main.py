@@ -7,7 +7,9 @@ import requests
 
 from collections import Counter
 
-from organizations import classify_organization, group_by_organization
+from organizations import NORDIC_COUNTRIES, classify_organization, group_by_organization
+from report import select_leads, write_leads_csv
+from scoring import score_organization
 
 API_URL = "https://clinicaltrials.gov/api/v2/studies"
 CACHE_PATH = Path("data/raw_studies.json")
@@ -22,7 +24,6 @@ FIELDS = "|".join([
     "Condition", "InterventionType", "InterventionName",
 ])
 
-NORDIC_COUNTRIES = ["Sweden", "Denmark", "Norway", "Finland", "Iceland"]
 OTHER_EUROPEAN_COUNTRIES = [
     "Germany", "France", "Netherlands", "Belgium", "Spain", "Italy",
     "United Kingdom", "Switzerland", "Austria", "Poland", "Ireland",
@@ -110,14 +111,15 @@ def main():
     for org_type, count in type_counts.most_common():
         print(f"- {org_type}: {count}")
 
-    # Provisional ranking by number of studies (NOT the final score: see section 5).
-    ranked = sorted(organizations.values(), key=lambda record: len(record["study_ids"]), reverse=True)
-    print()
-    print(f"{'Organization':52} {'Type':18} {'Studies':>7} {'Countries':>9}  Nordic")
-    for record in ranked[:15]:
-        has_nordic = "yes" if record["countries"] & set(NORDIC_COUNTRIES) else "no"
-        print(f"{record['name'][:51]:52} {record['type']:18} {len(record['study_ids']):>7} "
-              f"{len(record['countries']):>9}  {has_nordic}")
+    # Score every candidate customer (type "other" = funders, ministries, CROs: not customers).
+    candidates = [record for record in organizations.values() if record["type"] != "other"]
+    for record in candidates:
+        record["score"], record["reasons"] = score_organization(record)
+
+    leads = select_leads(candidates)
+    write_leads_csv(leads, "output/leads.csv")
+    print(f"Candidates scored: {len(candidates)}")
+    print(f"Wrote {len(leads)} rows to output/leads.csv")
 
 
 if __name__ == "__main__":

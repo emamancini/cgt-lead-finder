@@ -2,6 +2,8 @@
 
 import re
 
+NORDIC_COUNTRIES = ["Sweden", "Denmark", "Norway", "Finland", "Iceland"]
+
 # Legal forms removed from the END of a name, so "Acme Inc." and "Acme" match.
 LEGAL_SUFFIXES = {
     "inc", "ltd", "llc", "gmbh", "plc", "ag", "sa", "bv", "ab", "as", "spa",

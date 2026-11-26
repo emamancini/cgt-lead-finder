@@ -11,6 +11,8 @@ __pycache__/
 # Virtual environment (recreated from requirements.txt, never committed)
 .venv/
 
+# Raw API cache (recreated by running main.py; delete it to refresh)
+data/
 
 # Personal learning notes (kept local, never published)
 learning/

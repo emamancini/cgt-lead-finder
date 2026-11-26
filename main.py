@@ -5,6 +5,10 @@ from pathlib import Path
 
 import requests
 
+from collections import Counter
+
+from organizations import classify_organization, group_by_organization
+
 API_URL = "https://clinicaltrials.gov/api/v2/studies"
 CACHE_PATH = Path("data/raw_studies.json")
 
@@ -12,7 +16,7 @@ CACHE_PATH = Path("data/raw_studies.json")
 # people's names, emails or phone numbers are ever downloaded.
 FIELDS = "|".join([
     "NCTId", "BriefTitle",
-    "LeadSponsorName", "LeadSponsorClass", "CollaboratorName",
+    "LeadSponsorName", "LeadSponsorClass", "CollaboratorName", "CollaboratorClass",
     "Phase", "OverallStatus", "StartDate",
     "LocationCountry", "LocationFacility",
     "Condition", "InterventionType", "InterventionName",
@@ -97,9 +101,23 @@ def main():
     studies = load_studies()
     print(f"Collected studies: {len(studies)}")
 
-    unique_ids = {study["protocolSection"]["identificationModule"]["nctId"] for study in studies}
-    unique_count = len(unique_ids)
-    print(f"Unique studies: {unique_count}")
+    organizations = group_by_organization(studies)
+    for record in organizations.values():
+        record["type"] = classify_organization(record)
+    print(f"Organizations: {len(organizations)}")
+
+    type_counts = Counter(record["type"] for record in organizations.values())
+    for org_type, count in type_counts.most_common():
+        print(f"- {org_type}: {count}")
+
+    # Provisional ranking by number of studies (NOT the final score: see section 5).
+    ranked = sorted(organizations.values(), key=lambda record: len(record["study_ids"]), reverse=True)
+    print()
+    print(f"{'Organization':52} {'Type':18} {'Studies':>7} {'Countries':>9}  Nordic")
+    for record in ranked[:15]:
+        has_nordic = "yes" if record["countries"] & set(NORDIC_COUNTRIES) else "no"
+        print(f"{record['name'][:51]:52} {record['type']:18} {len(record['study_ids']):>7} "
+              f"{len(record['countries']):>9}  {has_nordic}")
 
 
 if __name__ == "__main__":

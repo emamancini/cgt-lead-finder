@@ -1,0 +1,15 @@
+# macOS system files
+.DS_Store
+
+# Python bytecode (generated automatically by Python)
+__pycache__/
+*.pyc
+
+# pytest cache (generated when tests run)
+.pytest_cache/
+
+# Virtual environment (recreated from requirements.txt, never committed)
+# TODO(you): write the line that tells Git to ignore the virtual envir
+.venv/
+
+# Hint: in task 1.2 we will create it with the name ".venv"; a trailing "/" means "a folder".
